@@ -155,3 +155,139 @@ def partie_enregistrer():
             indice_ligne += 1
     
     main()
+    # Fonctions d'interface utilisateur 
+def fen_parties():
+    """Fenêtre d'accueil permettant de changer les parametres du jeu"""
+    #Fenêtre de la liste
+    fenetre = tk.Toplevel()  
+    fenetre.title("Puissance 4")
+    fenetre.configure(bg="#fff8dc") 
+
+    titre = tk.Label(
+        fenetre, text="Puissance 4", font=("Arial", 28, "bold"),
+        bg="#fff8dc", fg="#8b8000"  
+    )
+    sous_titre = tk.Label(
+        fenetre, text="Choisissez une option", font=("Arial", 16),
+        bg="#fff8dc", fg="#8b8000"
+    )
+
+    button_nouvelle_partie = tk.Button(
+        fenetre, text="Nouvelle Partie", command=lambda: fen_accueil(fenetre),
+        font=("Arial", 14), bg="#ffeb3b", fg="black", padx=30, pady=15
+    )
+    button_partie_enregistrer = tk.Button(
+        fenetre, text="Reprendre Partie", command=partie_enregistrer,
+        font=("Arial", 14), bg="#ffd700", fg="black", padx=30, pady=15
+    )
+
+    # Placement
+    titre.pack(pady=(30, 10))
+    sous_titre.pack(pady=(0, 20))
+    button_nouvelle_partie.pack(pady=10)
+    button_partie_enregistrer.pack(pady=10)
+    
+def fen_accueil(fen):
+    """Fenêtre de configuration du jeu avec style jaune."""
+    global grid
+
+    clear_frame(fen)
+    fenetre = tk.Frame(fen, bg="#fff8dc") 
+    fenetre.pack(fill="both", expand=True)
+    #fenetre.title("Configuration de la Partie")
+    #fenetre.configure(bg="#fff8dc")
+    
+    
+    titre = tk.Label(
+        fenetre, text="Configurer la Partie", font=("Arial", 20, "bold"),
+        bg="#fff8dc", fg="#8b8000"
+    )
+    titre.grid(row=0, column=0, columnspan=2, pady=(20, 10))
+
+    # Labels
+    label_lignes = tk.Label(fenetre, text="Nombre de lignes :", font=("Arial", 12),
+                            bg="#fff8dc", fg="black")
+    label_colonnes = tk.Label(fenetre, text="Nombre de colonnes :", font=("Arial", 12),
+                              bg="#fff8dc", fg="black")
+    label_jetons_valid = tk.Label(fenetre, text="Jetons pour gagner :", font=("Arial", 12),
+                                  bg="#fff8dc", fg="black")
+
+    # Champs de saisie
+    entre_lignes = tk.Entry(fenetre, font=("Arial", 12))
+    entre_colonnes = tk.Entry(fenetre, font=("Arial", 12))
+    entre_jetons_valid = tk.Entry(fenetre, font=("Arial", 12))
+
+    # Boutons
+    button_confirmer = tk.Button(
+        fenetre, text="Confirmer", font=("Arial", 12, "bold"),
+        bg="#ffeb3b", fg="black",
+        command=lambda: access(entre_lignes.get(), entre_colonnes.get(), entre_jetons_valid.get())
+    )
+    button_default = tk.Button(
+        fenetre, text="Par défaut", font=("Arial", 12, "bold"),
+        bg="#ffd54f", fg="black",
+        command=main
+    )
+
+   
+    label_lignes.grid(row=1, column=0, padx=10, pady=10, sticky="e")
+    entre_lignes.grid(row=1, column=1, padx=10, pady=10)
+    label_colonnes.grid(row=2, column=0, padx=10, pady=10, sticky="e")
+    entre_colonnes.grid(row=2, column=1, padx=10, pady=10)
+    label_jetons_valid.grid(row=3, column=0, padx=10, pady=10, sticky="e")
+    entre_jetons_valid.grid(row=3, column=1, padx=10, pady=10)
+
+    button_default.grid(row=4, column=0, pady=20)
+    button_confirmer.grid(row=4, column=1, pady=20)
+
+    return fenetre
+
+def main():
+    """ Fenêtre principale où le jeu se joue et où toutes les fonctions sont utilisée"""
+    global canvas, canvas_tour, ROWS, COLS, CELL_SIZE
+
+    fenetre = tk.Toplevel()
+    fenetre.title("Jouons au puissance 4 !")
+    fenetre.attributes("-fullscreen", True)
+
+    # Obtenir les dimensions de l'écran
+    SCREEN_WIDTH = fenetre.winfo_screenwidth()
+    SCREEN_HEIGHT = fenetre.winfo_screenheight()
+
+    CANVAS_WIDTH = COLS * CELL_SIZE
+    CANVAS_HEIGHT =ROWS * CELL_SIZE
+
+   
+    pos_x = (SCREEN_WIDTH - CANVAS_WIDTH) // 2
+    pos_y = (SCREEN_HEIGHT - CANVAS_HEIGHT) // 2
+
+    # Créer le canvas avec la bonne taille
+    canvas = tk.Canvas(fenetre, width=COLS * CELL_SIZE, height=ROWS * CELL_SIZE, bg="#005BBB")
+    canvas.place(x=pos_x, y=pos_y)
+    canvas.bind("<Button-1>", handle_click)
+
+    # Création d'une fenêtre qui montre le tour du joueur
+    pos_x_canvas_tour = pos_x+CANVAS_WIDTH+CELL_SIZE
+    pos_y_canvas_tour = pos_y+CANVAS_HEIGHT-(2*CELL_SIZE)
+    canvas_tour = tk.Canvas(fenetre, width= 2*CELL_SIZE, height=2*CELL_SIZE, bg="#005BBB")
+    canvas_tour.place(x=pos_x_canvas_tour, y=pos_y_canvas_tour)
+
+    # Bouton pour revenir en arrière
+    bouton_undo = tk.Button(fenetre, text="🔙", font=("Arial", 32), command=undo)
+    bouton_undo.place(x=pos_x+(CANVAS_WIDTH-100), y=pos_y-85)
+
+    # Bouton pour recommencer la partie
+    button_recommencer = tk.Button(fenetre, text="⟳", font=("Arial", 32), command=recommencer)
+    button_recommencer.place(x=pos_x+CANVAS_WIDTH, y=pos_y-85)
+
+    # Bouton pour enregistrer la partie
+    bouton_enregistrer = tk.Button(fenetre, text="🖫", font=("Arial", 32), command=enregistrer_partie)
+    bouton_enregistrer.place(x=pos_x+(CANVAS_WIDTH+100), y=pos_y-85)
+
+     # Création du bouton pour supprimer la fenêtre principale
+    bouton_detruire = tk.Button(fenetre, text="✖", font=("Arial", 32), command=fenetre.destroy)
+    bouton_detruire.place(x=pos_x+CANVAS_WIDTH+200, y=pos_y-85)
+
+    draw_grid()  
+
+    return fenetre
