@@ -25,7 +25,7 @@ Installation : Pour exécuter ce projet, il est nécessaire d'installer Python e
 
 pip install tkinter
 
-Exécution du projet : Clonez ce dépôt : git clone 
+Exécution du projet : Clonez ce dépôt : git clone https://github.com/khalifa9200/Projet-puissance-4-khalifa
 
 Accédez au répertoire du projet : cd puissance-4
 
